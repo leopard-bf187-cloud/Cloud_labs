@@ -526,7 +526,7 @@ git push
 
 Архитектурная схема выполнена с учётом фактически использованных компонентов: AWS Cloud, регион Frankfurt, Default VPC, Availability Zone, Subnet, Security Group, EC2, nginx, PHP-FPM, PostgreSQL, внешний GitHub и локальный компьютер.
 
-![Архитектура развёртывания](images/lab2_mood_diary_aws_architecture.drawio.png)
+![Архитектура развёртывания](images/lab2_mood_diary_aws_architecture.drawio1.png)
 
 Редактируемый файл схемы: [`images/lab2_mood_diary_aws_architecture.drawio`](images/lab2_mood_diary_aws_architecture.drawio)
 

@@ -1,0 +1,107 @@
+ssh -i $HOME\.ssh\neural-emerald-aws-key.pem ec2-user@3.75.92.163
+
+systemctl status nginx
+
+sudo dnf -y install git composer postgresql16-server php8.4-fpm php8.4-cli php8.4-pgsql php8.4-mbstring php8.4-xml
+
+nginx -v
+
+systemctl status nginx
+
+php -v
+
+php -m | grep pdo_pgsql
+
+sudo postgresql-setup --initdb
+
+sudo grep -v '^#' /var/lib/pgsql/data/pg_hba.conf | grep -v '^$'
+
+sudo sed -i 's/ident$/scram-sha-256/' /var/lib/pgsql/data/pg_hba.conf
+
+sudo systemctl enable --now postgresql
+
+systemctl status postgresql
+
+sudo -u postgres psql -c "CREATE USER mooddiary WITH PASSWORD 'ТВОЙ_ПАРОЛЬ';"
+sudo -u postgres psql -c "CREATE DATABASE mooddiary OWNER mooddiary;"
+
+psql -h localhost -U mooddiary -d mooddiary -c "SELECT 1;"
+
+
+
+
+
+sudo mkdir -p /var/www/mood-diary
+sudo chown ec2-user:ec2-user /var/www/mood-diary
+
+git clone https://github.com/leopard-bf187-cloud/LaboratoryApp.git /var/www/mood-diary
+cd /var/www/mood-diary
+ls -la
+
+nano /var/www/mood-diary/.env
+
+chmod 640 .env
+sudo chgrp apache .env
+ls -la .env
+
+composer install --no-dev --optimize-autoloader
+
+php migrate.php
+
+php -r "require 'src/Core/Database.php'; Database::getConnection(); echo \"DB OK\n\";"
+
+
+
+
+
+cd /var/www/mood-diary
+git pull --ff-only
+
+sudo systemctl enable --now php-fpm
+
+ls -l /run/php-fpm/www.sock
+
+sudo nano /etc/nginx/conf.d/mood-diary.conf
+
+sudo systemctl restart nginx
+
+curl http://localhost/health
+
+curl -I http://localhost/
+
+
+
+
+
+nano ~/deploy.sh
+
+chmod +x ~/deploy.sh
+
+
+
+
+
+ssh -i $HOME\.ssh\neural-emerald-aws-key.pem ec2-user@3.75.92.163 ./deploy.sh
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,114 @@
+ssh bastion
+ssh web
+ssh db
+
+
+sudo dnf -y install postgresql16-server
+ctrl + c
+
+
+ssh db
+curl https://checkip.amazonaws.com
+
+
+sudo dnf -y update
+sudo dnf -y install postgresql16-server
+
+
+sudo postgresql-setup --initdb
+sudo sed -i "s/^#listen_addresses = 'localhost'/listen_addresses = '*'/" /var/lib/pgsql/data/postgresql.conf
+grep "^listen_addresses" /var/lib/pgsql/data/postgresql.conf
+sudo systemctl enable --now postgresql
+sudo systemctl status postgresql
+sudo -u postgres psql
+
+
+CREATE USER student;
+CREATE DATABASE lab3 OWNER student;
+sudo -u postgres psql -l
+
+
+sudo dnf -y install postgresql16
+psql -h 10.0.10.12 -U student -d lab3 -c "SELECT version();"
+
+
+timeout 5 bash -c '</dev/tcp/10.0.10.12/5432' && echo open || echo closed
+timeout 5 bash -c '</dev/tcp/10.0.10.12/5432' && echo open || echo closed
+
+ssh db
+curl -m 5 https://github.com
+
+
+---- part 2
+
+
+ssh app
+
+
+hostname -I
+sudo systemctl status nginx --no-pager
+sudo systemctl status php-fpm --no-pager
+sudo systemctl status postgresql --no-pager
+
+
+sudo grep -nE '^(APP_URL|BASE_URL|SITE_URL)=' /var/www/mood-diary/.env
+sudo nano /var/www/mood-diary/.env
+sudo systemctl reload php-fpm
+
+
+sudo -u postgres psql
+CREATE USER mood_diary;
+\password mood_diary
+CREATE DATABASE mood_diary OWNER mood_diary;
+\q
+
+sudo nano /var/lib/pgsql/data/pg_hba.conf
+host  mood_diary  mood_diary  10.0.0.0/24  scram-sha-256
+
+
+sudo systemctl restart postgresql
+sudo systemctl is-active postgresql
+sudo -u postgres psql -l
+
+
+getent ahostsv4 db.timecapsule.internal
+
+
+nslookup db.timecapsule.internal
+
+
+sudo grep -E '^(DB_HOST|DB_PORT|DB_NAME|DB_DATABASE|DB_USER|DB_USERNAME)=' /var/www/mood-diary/.env
+pg_dump --version
+
+
+mkdir -p ~/lab3-backup
+chmod 700 ~/lab3-backup
+pg_dump -h localhost -U mooddiary -d mooddiary -Fc -f ~/lab3-backup/mooddiary.dump
+
+
+ls -lh ~/lab3-backup/mooddiary.dump
+pg_restore -l ~/lab3-backup/mooddiary.dump | head -20
+
+
+psql -h db.timecapsule.internal -U mood_diary -d mood_diary -c "\dt"
+pg_restore -h db.timecapsule.internal -U mood_diary -d mood_diary --no-owner --no-privileges --exit-on-error ~/lab3-backup/mooddiary.dump
+psql -h db.timecapsule.internal -U mood_diary -d mood_diary -c "\dt"
+
+
+sudo cp -p /var/www/mood-diary/.env /var/www/mood-diary/.env.lab3-backup
+sudo nano /var/www/mood-diary/.env
+
+DB_HOST=db.timecapsule.internal
+DB_PORT=5432
+DB_NAME=mood_diary
+DB_USER=mood_diary
+DB_PASSWORD=<pw>
+
+sudo systemctl reload php-fpm
+
+sudo systemctl disable --now postgresql
+sudo systemctl is-active postgresql
+
+
+curl --max-time 10 https://checkip.amazonaws.com
+sudo dnf -y update

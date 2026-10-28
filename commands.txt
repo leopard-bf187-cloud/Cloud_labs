@@ -1,0 +1,87 @@
+BUCKET=timecapsule-dev-uploads-leopard
+echo $BUCKET
+
+mkdir -p lab4/2026/10 && cd lab4
+echo "photo placeholder" > photo.txt
+echo "october report" > 2026/10/report.txt
+echo "october report 2" > 2026/10/report-2.txt
+
+aws s3 cp photo.txt s3://$BUCKET/uploads/photo.txt
+aws s3 sync 2026 s3://$BUCKET/uploads/2026
+aws s3 ls s3://$BUCKET --recursive
+aws s3 ls s3://$BUCKET
+aws s3 ls s3://$BUCKET/uploads/
+aws s3api head-object --bucket "$BUCKET" --key "uploads/AssetEditor_art1.png"
+aws s3api head-object --bucket "$BUCKET" --key "uploads/2026/10/report.txt"
+aws s3 cp s3://$BUCKET/uploads/photo.txt downloaded.txt && cat downloaded.txt
+aws s3 rm s3://$BUCKET/uploads/2026/10/report-2.txt
+
+aws s3 ls s3://$BUCKET/uploads/
+aws s3 ls s3://$BUCKET/uploads/ --endpoint-url http://s3.eu-central-1.amazonaws.com
+
+echo 'export BUCKET=timecapsule-dev-uploads-leopard' >> ~/.bashrc
+source ~/.bashrc
+aws s3 presign s3://$BUCKET/uploads/photo.txt --expires-in 120 --region eu-central-1
+
+
+cd /var/www/mood-diary
+ls -la storage/uploads
+find . -type d \( -name "uploads" -o -name "attachments" \)
+grep -E '^(UPLOAD_DIR|UPLOAD_PATH)=' .env
+aws s3 sync storage/uploads s3://$BUCKET/uploads/ --dryrun
+aws s3 sync storage/uploads s3://$BUCKET/uploads/
+aws s3 sync storage/uploads s3://$BUCKET/uploads/ --dryrun
+
+
+cd /var/www/mood-diary
+git fetch origin
+git switch -c feat/cloud-lab4-s3-attachments --track origin/feat/cloud-lab4-s3-attachments
+composer update aws/aws-sdk-php --with-all-dependencies
+
+printf '\nS3_BUCKET=timecapsule-dev-uploads-leopard\nAWS_REGION=eu-central-1\n' >> .env
+
+composer update twig/twig --with-all-dependencies
+composer show twig/twig
+composer audit
+
+git add composer.lock
+git commit -m "build: update dependencies for AWS S3 and fix Twig vulnerabilities"
+git push origin feat/cloud-lab4-s3-attachments
+
+cd /var/www/mood-diary
+git restore composer.lock
+git pull --ff-only origin feat/cloud-lab4-s3-attachments
+composer install --no-dev --optimize-autoloader
+
+grep -E '^(S3_BUCKET|AWS_REGION)=' .env
+
+aws sts get-caller-identity
+aws s3 ls s3://timecapsule-dev-uploads-leopard/uploads/
+grep -E '^(S3_BUCKET|AWS_REGION)=' /var/www/mood-diary/.env
+
+
+sudo nano /etc/nginx/conf.d/mood-diary.conf
+... client_max_body_size 16m; ...
+sudo nginx -t
+sudo systemctl reload nginx
+
+sudo nano /etc/php.ini
+```
+upload_max_filesize = 10M
+post_max_size = 16M
+file_uploads = On
+```
+sudo systemctl restart php-fpm
+
+php -i | grep -E 'upload_max_filesize|post_max_size|file_uploads'
+
+https://timecapsule-dev-uploads-leopard.s3.eu-central-1.amazonaws.com/uploads/2f8c57eb6394878c7ade23bca8a2ce90.png?response-content-type=image%2Fpng&response-content-disposition=inline%3B%20filename%3D%22screen00000.png%22%3B%20filename%2A%3DUTF-8%27%27screen00000.png&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEEAaDGV1LWNlbnRyYWwtMSJHMEUCIFq9t64So26RkzRQ88koEzjO2%2Bj1W%2Fqh%2Fo4YuxMAT9zWAiEAyosDLrXEXtE6wlkSZtPs8zuUq83B6UUAP9zFK7iFvVwqwwUICRAAGgw4NTY5ODY0NDk5MjIiDPpufxOk1C5lFZflYyqgBSoHp1tVVrH29Zfwjc%2BoxsyvH7NI3f3Fzp1fqChTVLXhGB6iB3mrTr75bvIWCq0qFA80VzcDoUJqYBxr0aceUr6vYMjfu1UDNEr%2FEMGPdJ6M2XS6sHlsLDKu1V3JxMVxD6Z5%2FW6oOsK1n0IYBKP%2Fjed%2FHecMCSrCNNYEm9q%2BDKSoOWadnko8SfaM82DX%2B6%2BQ5dYngaGdJ5lX2f7WO6y98Bwd3tQuf2VKWJYQ2ewSew9fo6MtomN6%2BGbkYy5BU79tqr90%2FGWKMppUUBEtf4AcONvtgsG7cSQHJoJ3Dp4855Y9QPLNikyQhZeNrnjE59T27PEuyHr7DVDkzsgoDudptP8QJDJsgwWWPu5cHbHvB9%2BQoS7tJpkll1KrJKq8M6oYuXs2iF3wgEYni8%2FeO%2Fp1hXO%2Bj%2FdqM2TlGqTyDFw9UfdnYojDtYMsBlTKEPpHiILKs9TX2B5qwLQPx1jrkC05b3Wx9O1Mv%2FlTw5x8pe2IcbND9Jh4ei61x3uYUMR5VyoknZL2cG1KlAn%2BI8rgEoKurvyQAPeqhZ2noTAE7429UJwcDjuKfJ43TMOvzdu9iE1vZBpk5hzvbQuH55HkhtyYjPBXdQ16Dvyj2AIa7JfNhmncYYmAd5kTAcN352OSjbjL8FJqfGnxnzXB1EFKjDrerCvQb7264xOHMDpjO89%2FiZCibPZQGpLZ2d9Ll8Wit8I213YcMCl8s4C2MvKvCUUh1XgstMYzCsxVIgs82UkmxybccVwgJ4HIou%2F8KJP%2FaeXYulLRwM1QpId4TalKXL908gGLpCvfEbZGPIYKECmnilR6JCpKhcipBHbr3t957aQIwDY84L85CEXoUIP8Kq2wuqvA%2F%2FCsaUpHpssdE8OT31d2bmEEqB7Px1tjQCJS%2B4%2FTIzCkwYjXBjqxAfypX2hqM2zUd01XJb%2FpRk%2BZAEiENaxmMmBoNyqIkzzup8qNMIZeXIaMkWO3nHEd0ZId2AiVRIcBNs2NJFQchppL%2BAVwKMDY9ovXpV28EBW692z%2FdXdbpz77M%2FEyaDnBhCLFmUvce5G4V8iuLyOTuZw%2Fz91CmM4Eq92UG60iCtxQnIgl2ucRxi8dOPJRPjlyP00NSkjDgmhAeg8mJomqk01goDa%2BcnIS7IJHuJsZOeqquw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA4PCC7PABHNEU5CSX%2F20261028%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Date=20261028T163615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Signature=8ad9d2ad6c10126f1d54d57ec4db8f52dbc4167ddbfc0fc965d064e89d0a1228
+
+cd /var/www/mood-diary
+ls -ld storage/uploads
+aws sts get-caller-identity
+aws s3 ls s3://timecapsule-dev-uploads-leopard/backups/
+
+aws s3api head-object --bucket timecapsule-dev-uploads-leopard --key uploads/lab4-file-does-not-exist-999.txt
+
+aws s3api head-object --bucket timecapsule-dev-uploads-leopard --key uploads/lab4-file-does-not-exist-999.txt

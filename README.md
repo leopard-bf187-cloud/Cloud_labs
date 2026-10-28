@@ -51,6 +51,17 @@
 
 Доказательства: [структура объектов](images/001-bucket-folders-created.png), [AccessDenied](images/002-img-access-denied.png), [метаданные изображения](images/003-img-props.png).
 
+**Рисунки 1–3.** Содержимое бакета, отказ в публичном доступе и метаданные PNG.
+
+<p align="center">
+  <img src="images/001-bucket-folders-created.png" alt="Рисунки 1–3. Содержимое бакета, отказ в публичном досту (1)" width="48%" />
+  <img src="images/002-img-access-denied.png" alt="Рисунки 1–3. Содержимое бакета, отказ в публичном досту (2)" width="48%" />
+</p>
+
+<p align="center">
+  <img src="images/003-img-props.png" alt="Рисунки 1–3. Содержимое бакета, отказ в публичном досту (3)" width="48%" />
+</p>
+
 ### 3.2. Задание №2 — AWS CloudShell и операции CLI
 
 Из CloudShell проверены загрузка, синхронизация, перечисление, получение метаданных, скачивание и удаление объектов:
@@ -71,6 +82,13 @@ aws s3 rm s3://$BUCKET/uploads/2026/10/report-2.txt
 
 Доказательства: [список объектов и HEAD](images/004-cloudshell-output.png), [скачивание и удаление](images/005-cloudshell-file-download-delete.png).
 
+**Рисунки 4–5.** Работа с S3 из CloudShell: список объектов, метаданные, скачивание и удаление.
+
+<p align="center">
+  <img src="images/004-cloudshell-output.png" alt="Рисунки 4–5. Работа с S3 из CloudShell: список объектов (1)" width="48%" />
+  <img src="images/005-cloudshell-file-download-delete.png" alt="Рисунки 4–5. Работа с S3 из CloudShell: список объектов (2)" width="48%" />
+</p>
+
 ### 3.3. Задание №3 — Bucket Policy: запрет HTTP
 
 Добавлена ресурсная политика `DenyInsecureTransport` с условием `"aws:SecureTransport": "false"`. Она явно запрещает операции по незашифрованному HTTP для бакета и его объектов.
@@ -84,6 +102,12 @@ aws s3 ls s3://$BUCKET/uploads/ --endpoint-url http://s3.eu-central-1.amazonaws.
 
 Файл политики: [`policy.json`](policy.json). Доказательство: [проверка HTTPS и HTTP](images/006-cloudshell-policy-check.png).
 
+**Рисунок 6.** Проверка HTTPS-only Bucket Policy.
+
+<p align="center">
+  <img src="images/006-cloudshell-policy-check.png" alt="Рисунок 6. Проверка HTTPS-only Bucket Policy. (1)" width="86%" />
+</p>
+
 ### 3.4. Задание №4 — Versioning и Delete Marker
 
 После включения Versioning объекты, загруженные до этого момента, отображались с `Version ID = null`. Файл `uploads/notes.txt` был загружен в вариантах `v1` и `v2`.
@@ -95,6 +119,17 @@ aws s3 ls s3://$BUCKET/uploads/ --endpoint-url http://s3.eu-central-1.amazonaws.
 Таким образом, обычное удаление можно отменить, пока сохранены прошлые версии, а удаление конкретного `VersionId` уничтожает именно эту версию и требует более строгих прав.
 
 Доказательства: [версии объектов](images/007-objects-with-versions.png), [история `notes.txt`](images/008-versions.png), [Delete Marker](images/009-delete-marker.png).
+
+**Рисунки 7–9.** Версионирование объектов, история изменений и Delete Marker.
+
+<p align="center">
+  <img src="images/007-objects-with-versions.png" alt="Рисунки 7–9. Версионирование объектов, история изменени (1)" width="48%" />
+  <img src="images/008-versions.png" alt="Рисунки 7–9. Версионирование объектов, история изменени (2)" width="48%" />
+</p>
+
+<p align="center">
+  <img src="images/009-delete-marker.png" alt="Рисунки 7–9. Версионирование объектов, история изменени (3)" width="48%" />
+</p>
 
 ### 3.5. Задание №5 — S3 Lifecycle
 
@@ -111,6 +146,13 @@ aws s3 ls s3://$BUCKET/uploads/ --endpoint-url http://s3.eu-central-1.amazonaws.
 
 Доказательства: [правило Lifecycle](images/010-lifecycle-rule.png), [Review transition and expiration actions](images/011-review-transition-and-expiration-actions.png).
 
+**Рисунки 10–11.** Правило жизненного цикла и параметры переходов/удаления.
+
+<p align="center">
+  <img src="images/010-lifecycle-rule.png" alt="Рисунки 10–11. Правило жизненного цикла и параметры пер (1)" width="48%" />
+  <img src="images/011-review-transition-and-expiration-actions.png" alt="Рисунки 10–11. Правило жизненного цикла и параметры пер (2)" width="48%" />
+</p>
+
 ### 3.6. Задание №6 — Presigned URL
 
 Создана подписанная ссылка из S3 Console на 5 минут и из AWS CLI на 120 секунд:
@@ -124,6 +166,17 @@ aws s3 presign s3://$BUCKET/uploads/photo.txt --expires-in 120 --region eu-centr
 `aws s3 presign` создаёт подпись локально с использованием имеющихся AWS credentials; S3 проверяет подпись при фактическом запросе. Полный URL, включая `X-Amz-Signature` и временный токен, в отчёт не помещён.
 
 Доказательства: [ссылка из консоли](images/012-image-shared-url.png), [ссылка на 120 секунд](images/013-shared-url-120s.png), [истечение срока](images/014-shared-url-120s-timeout.png).
+
+**Рисунки 12–14.** Создание и проверка временных подписанных ссылок.
+
+<p align="center">
+  <img src="images/012-image-shared-url.png" alt="Рисунки 12–14. Создание и проверка временных подписанны (1)" width="48%" />
+  <img src="images/013-shared-url-120s.png" alt="Рисунки 12–14. Создание и проверка временных подписанны (2)" width="48%" />
+</p>
+
+<p align="center">
+  <img src="images/014-shared-url-120s-timeout.png" alt="Рисунки 12–14. Создание и проверка временных подписанны (3)" width="48%" />
+</p>
 
 ## 4. Часть 2 — продвинутые задания №7–14
 
@@ -144,6 +197,17 @@ aws sts get-caller-identity
 **Ограничение по №8:** проверка всех десяти операций под `timecapsule-dev-s3-tester` через `sts:AssumeRole` не проводилась, поэтому таблица фактических результатов отсутствует; роль создана, но задание №8 полностью не закрыто.
 
 Политики: [исходная IAM](policy_iam.json), [финальная IAM](policy_iam2.json). Доказательства: [созданные роли](images/015-roles.png), [роль на EC2](images/016-appsv-iam-role.png), [identity EC2](images/017-get-caller-identity.png).
+
+**Рисунки 15–17.** IAM-роли, привязка к EC2 и подтверждение временных credentials.
+
+<p align="center">
+  <img src="images/015-roles.png" alt="Рисунки 15–17. IAM-роли, привязка к EC2 и подтверждение (1)" width="48%" />
+  <img src="images/016-appsv-iam-role.png" alt="Рисунки 15–17. IAM-роли, привязка к EC2 и подтверждение (2)" width="48%" />
+</p>
+
+<p align="center">
+  <img src="images/017-get-caller-identity.png" alt="Рисунки 15–17. IAM-роли, привязка к EC2 и подтверждение (3)" width="48%" />
+</p>
 
 ### 4.2. Задание №10 — существующие файлы
 
@@ -189,6 +253,13 @@ aws: [ERROR]: The user-provided path storage/uploads does not exist.
 
 Доказательства: [вложение работает](images/018-vlojenie-works.png), [недействительная ссылка/ошибка доступа](images/019-vlojenie-ne-works.png).
 
+**Рисунки 18–19.** Получение вложения и последующий отказ в доступе по недействительной ссылке.
+
+<p align="center">
+  <img src="images/018-vlojenie-works.png" alt="Рисунки 18–19. Получение вложения и последующий отказ в (1)" width="48%" />
+  <img src="images/019-vlojenie-ne-works.png" alt="Рисунки 18–19. Получение вложения и последующий отказ в (2)" width="48%" />
+</p>
+
 ### 4.5. Задание №13 — сервер без постоянных локальных вложений и Least Privilege
 
 Проверка `ls -ld storage/uploads` показала отсутствие каталога, а загрузка вложения через сайт ранее была успешна. Это подтверждает, что постоянное содержимое вложений хранится не в директории приложения.
@@ -208,6 +279,13 @@ S3 не раскрывает факт отсутствия объекта кли
 
 Доказательства: [запрет доступа к backups](images/020-ceto-tut-zapresheno.png), [404 → 403](images/021-snova-ceto-zapresheno.png).
 
+**Рисунки 20–21.** Проверки ограничения полномочий роли и изменения ответа S3.
+
+<p align="center">
+  <img src="images/020-ceto-tut-zapresheno.png" alt="Рисунки 20–21. Проверки ограничения полномочий роли и и (1)" width="48%" />
+  <img src="images/021-snova-ceto-zapresheno.png" alt="Рисунки 20–21. Проверки ограничения полномочий роли и и (2)" width="48%" />
+</p>
+
 ### 4.6. Задание №14 — архитектура и ADR
 
 Обновлена архитектурная схема сети из ЛР3. На диаграмме обозначены IAM Role, S3-бакет **вне VPC**, префикс `uploads/` и потоки API-загрузки/удаления и браузерного скачивания.
@@ -216,6 +294,12 @@ S3 не раскрывает факт отсутствия объекта кли
 - **[ADR-0003 — EBS против EFS против S3](docs/adr/0003-attachment-storage.md)**
 
 В ADR объяснены защита при случайном удалении (Versioning), ограничение накопления старых версий (Lifecycle), время действия ссылок и последствия перехода к нескольким EC2-серверам за балансировщиком.
+
+**Рисунок 22.** Обновлённая архитектура AWS (светлая версия); [тёмная версия](images/diag_dark.drawio.png) и [исходник .drawio](images/Lab4_AWS_Architecture_AmazonIcons.drawio).
+
+<p align="center">
+  <img src="images/diag_light.drawio.png" alt="Рисунок 22. Обновлённая архитектура AWS (светлая версия (1)" width="86%" />
+</p>
 
 ## 5. Контрольные вопросы — краткие ответы
 

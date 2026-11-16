@@ -1,0 +1,4 @@
+
+{
+  "DbInstanceIdentifier": "mooddiary-dev-rds"
+}

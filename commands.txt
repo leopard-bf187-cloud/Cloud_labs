@@ -1,0 +1,66 @@
+psql -h "mooddiary-dev-rds.cv68waayseel.eu-central-1.rds.amazonaws.com" -p 5432 -U dbadmin -d postgres "sslmode=require"
+
+
+CREATE USER mooddiary;
+\password mooddiary
+GRANT mooddiary TO dbadmin;
+CREATE DATABASE mooddiary OWNER mooddiary;
+\l
+\q
+
+
+cd /var/www/mood-diary
+ls -la
+grep -E '^(DB_HOST|DB_PORT|DB_NAME|DB_USER)=' .env
+pg_dump --version
+
+
+cd /home/ec2-user
+umask 077
+pg_dump -h db.timecapsule.internal -p 5432 -U mood_diary -d mood_diary --no-owner --no-privileges -f mooddiary-lab5.sql
+ls -lh ~/mooddiary-lab5.sql
+
+
+sudo -u postgres psql -c "SELECT pg_reload_conf();"
+
+
+cd /home/ec2-user
+umask 077
+sudo -u postgres pg_dump -d mood_diary --no-owner --no-privileges > mooddiary-lab5.sql
+echo $?
+ls -lh mooddiary-lab5.sql
+
+
+psql "host=mooddiary-dev-rds.cv68waayseel.eu-central-1.rds.amazonaws.com port=5432 dbname=mooddiary user=mooddiary sslmode=require" -X -v ON_ERROR_STOP=1 --single-transaction -f ~/mooddiary-lab5.sql
+psql "host=mooddiary-dev-rds.cv68waayseel.eu-central-1.rds.amazonaws.com port=5432 dbname=mooddiary user=mooddiary sslmode=require"
+
+
+SELECT COUNT(*) FROM users;
+SELECT COUNT(*) FROM entries;
+SELECT COUNT(*) FROM moods;
+SELECT COUNT(*) FROM entry_attachments;
+\dt
+
+
+sudo -u postgres psql -d mood_diary -c "SELECT 'users' AS tbl, COUNT(*) FROM users UNION ALL SELECT 'entries', COUNT(*) FROM entries UNION ALL SELECT 'moods', COUNT(*) FROM moods UNION ALL SELECT 'entry_attachments', COUNT(*) FROM entry_attachments;"
+
+
+dig +short db.timecapsule.internal CNAME
+
+
+psql "host=db.timecapsule.internal port=5432 dbname=mooddiary user=mooddiary sslmode=require"
+
+
+SELECT current_database(), current_user, inet_server_addr();
+SELECT COUNT(*) FROM entries;
+
+
+cd /var/www/mood-diary
+cp -p .env .env.lab5-backup
+chmod 600 .env.lab5-backup
+nano .env
+
+
+php -r '$pdo = (require "src/Core/Database.php") ? Database::getConnection() : null; echo "Database: " . $pdo->query("SELECT current_database()")->fetchColumn() . PHP_EOL;'
+
+

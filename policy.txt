@@ -1,0 +1,11 @@
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "rds:StopDBInstance",
+      "Resource": "arn:aws:rds:eu-central-1:ACCOUNT_ID:db:mooddiary-dev-rds"
+    }
+  ]
+}

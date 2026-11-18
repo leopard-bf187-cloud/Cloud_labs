@@ -1,0 +1,10 @@
+git fetch origin
+git switch feat/cloud-lab6-dynamodb-sessions
+
+nano .env
+DYNAMODB_SESSIONS_TABLE=mood-diary-dev-sessions
+AWS_REGION=eu-central-1
+
+mood-diary-dev-alb-687909283.eu-central-1.elb.amazonaws.com
+
+git pull origin feat/cloud-lab6-dynamodb-sessions
